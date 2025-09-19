@@ -79,3 +79,53 @@ export interface NotificationSettings {
   reportDay: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
   metrics: string[];
 }
+
+export interface FileUpload {
+  id: string;
+  name: string;
+  size: number;
+  status: 'uploading' | 'processing' | 'completed' | 'error';
+  progress: number;
+  data?: any[];
+  errors?: string[];
+  uploadedAt: string;
+}
+
+export interface DateRange {
+  start: string;
+  end: string;
+}
+
+export interface CustomerDetail extends Customer {
+  address: string;
+  phone: string;
+  notes: string;
+  orders: Array<{
+    id: string;
+    date: string;
+    amount: number;
+    status: string;
+  }>;
+  activityLog: Array<{
+    id: string;
+    date: string;
+    action: string;
+    details: string;
+  }>;
+}
+
+export interface FileUpload {
+  id: string;
+  name: string;
+  size: number;
+  status: 'uploading' | 'processing' | 'completed' | 'error';
+  progress: number;
+  data?: any[];
+  errors?: string[];
+  uploadedAt: string;
+}
+
+export interface DateRange {
+  start: string;
+  end: string;
+}

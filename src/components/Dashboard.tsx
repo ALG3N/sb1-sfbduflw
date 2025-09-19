@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { DollarSign, Users, ShoppingCart, TrendingUp, Package, Target, Download, Calendar, Filter, MoreVertical, RefreshCw, Upload, FileText, Bell, Zap } from 'lucide-react';
+import { DollarSign, Users, ShoppingCart, TrendingUp, Package, Target, Download, Calendar, RefreshCw, AlertTriangle, ChevronRight } from 'lucide-react';
 import { AnalyticsCard } from './AnalyticsCard';
 import { SimpleChart } from './SimpleChart';
 import { monthlyData, regionData } from '../data/mockData';
+import { DateRange } from '../types';
+import { format, subDays } from 'date-fns';
 
 export function Dashboard() {
-  const [dateRange, setDateRange] = useState('30d');
-  const [selectedMetrics, setSelectedMetrics] = useState(['revenue', 'customers', 'orders']);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showExportOptions, setShowExportOptions] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    start: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
+    end: format(new Date(), 'yyyy-MM-dd')
+  });
+  const [refreshing, setRefreshing] = useState(false);
+  const [expandedChart, setExpandedChart] = useState<string | null>(null);
 
   const monthlyChartData = monthlyData.slice(-6).map(item => ({
     label: item.month,
@@ -26,139 +30,148 @@ export function Dashboard() {
     value: item.customers
   }));
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    // Simulate data refresh
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setRefreshing(false);
+  };
+
   const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
-    // Create sample data for export
-    const exportData = [
-      ['Metric', 'Value', 'Change', 'Period'],
-      ['Total Revenue', '$1,492,000', '+12.5%', dateRange],
-      ['Total Customers', '2,389', '+8.2%', dateRange],
-      ['Orders This Month', '745', '+15.3%', dateRange],
-      ['Average Order Value', '$262', '-2.1%', dateRange],
-      ['Products Sold', '1,850', '+23.7%', dateRange],
-      ['Conversion Rate', '3.4%', '+0.8%', dateRange]
-    ];
+    // Simulate export functionality
+    console.log(`Exporting dashboard data as ${format}`);
+    // In a real app, you would generate and download the file
+  };
 
-    if (format === 'csv') {
-      const csvContent = exportData.map(row => row.join(',')).join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `dashboard-export-${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } else if (format === 'excel') {
-      // For Excel export, you'd typically use a library like xlsx
-      alert('Excel export functionality would be implemented with a library like xlsx');
-    } else if (format === 'pdf') {
-      // For PDF export, you'd use a library like jsPDF
-      alert('PDF export functionality would be implemented with a library like jsPDF');
+  const handleCardClick = (cardType: string) => {
+    // Navigate to detailed view or show drill-down modal
+    console.log(`Clicked on ${cardType} card`);
+  };
+
+  const handleChartExpand = (chartType: string) => {
+    setExpandedChart(expandedChart === chartType ? null : chartType);
+  };
+
+  const alerts = [
+    {
+      id: '1',
+      type: 'warning',
+      title: 'Låg lagernivå',
+      message: 'Premium Widget har endast 5 enheter kvar i lager',
+      action: 'Beställ mer'
+    },
+    {
+      id: '2',
+      type: 'success',
+      title: 'Målet uppnått',
+      message: 'Månadsmålet för försäljning har uppnåtts med 12% marginal',
+      action: 'Se detaljer'
     }
-    
-    setShowExportOptions(false);
-  };
-
-  const refreshData = async () => {
-    setIsRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 2000);
-  };
-
-  const getDateRangeLabel = (range: string) => {
-    switch (range) {
-      case '7d': return 'Last 7 days';
-      case '30d': return 'Last 30 days';
-      case '90d': return 'Last 90 days';
-      case '1y': return 'Last year';
-      default: return 'Last 30 days';
-    }
-  };
+  ];
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-start mb-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Sales Dashboard</h1>
           <p className="text-gray-600 mt-2">Get insights into your business performance and growth trends</p>
         </div>
         
-        {/* Dashboard Controls */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 mt-4 md:mt-0">
+          {/* Date Range Picker */}
           <div className="flex items-center space-x-2">
             <Calendar className="h-4 w-4 text-gray-500" />
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
+            <input
+              type="date"
+              value={dateRange.start}
+              onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="1y">Last year</option>
-            </select>
+            />
+            <span className="text-gray-500">-</span>
+            <input
+              type="date"
+              value={dateRange.end}
+              onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
 
+          {/* Refresh Button */}
           <button
-            onClick={refreshData}
-            disabled={isRefreshing}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span>{refreshing ? 'Uppdaterar...' : 'Uppdatera'}</span>
           </button>
 
-          <div className="relative">
-            <button
-              onClick={() => setShowExportOptions(!showExportOptions)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export
+          {/* Export Dropdown */}
+          <div className="relative group">
+            <button className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <Download className="h-4 w-4" />
+              <span>Exportera</span>
             </button>
-
-            {showExportOptions && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                <div className="py-2">
-                  <button
-                    onClick={() => handleExport('csv')}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
-                  >
-                    Export as CSV
-                  </button>
-                  <button
-                    onClick={() => handleExport('excel')}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
-                  >
-                    Export as Excel
-                  </button>
-                  <button
-                    onClick={() => handleExport('pdf')}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
-                  >
-                    Export as PDF
-                  </button>
-                </div>
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+              <div className="py-2">
+                <button
+                  onClick={() => handleExport('csv')}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Exportera som CSV
+                </button>
+                <button
+                  onClick={() => handleExport('excel')}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Exportera som Excel
+                </button>
+                <button
+                  onClick={() => handleExport('pdf')}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Exportera som PDF
+                </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Date Range Indicator */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <p className="text-sm text-blue-700">
-          <span className="font-medium">Current view:</span> {getDateRangeLabel(dateRange)} • 
-          <span className="ml-1">Data last updated: {new Date().toLocaleString()}</span>
-        </p>
-      </div>
+      {/* Performance Alerts */}
+      {alerts.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Aviseringar</h3>
+          <div className="space-y-3">
+            {alerts.map(alert => (
+              <div key={alert.id} className={`flex items-center justify-between p-3 rounded-lg ${
+                alert.type === 'warning' ? 'bg-yellow-50 border border-yellow-200' : 'bg-green-50 border border-green-200'
+              }`}>
+                <div className="flex items-center space-x-3">
+                  <AlertTriangle className={`h-5 w-5 ${
+                    alert.type === 'warning' ? 'text-yellow-600' : 'text-green-600'
+                  }`} />
+                  <div>
+                    <p className="font-medium text-gray-900">{alert.title}</p>
+                    <p className="text-sm text-gray-600">{alert.message}</p>
+                  </div>
+                </div>
+                <button className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                  alert.type === 'warning' 
+                    ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' 
+                    : 'bg-green-100 text-green-800 hover:bg-green-200'
+                }`}>
+                  {alert.action}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="cursor-pointer" onClick={() => alert('Drill down into revenue details')}>
+        <div onClick={() => handleCardClick('revenue')} className="cursor-pointer">
           <AnalyticsCard
             title="Total Revenue"
             value="$1,492,000"
@@ -167,7 +180,7 @@ export function Dashboard() {
             icon={DollarSign}
           />
         </div>
-        <div className="cursor-pointer" onClick={() => alert('View customer details')}>
+        <div onClick={() => handleCardClick('customers')} className="cursor-pointer">
           <AnalyticsCard
             title="Total Customers"
             value="2,389"
@@ -176,7 +189,7 @@ export function Dashboard() {
             icon={Users}
           />
         </div>
-        <div className="cursor-pointer" onClick={() => alert('View order details')}>
+        <div onClick={() => handleCardClick('orders')} className="cursor-pointer">
           <AnalyticsCard
             title="Orders This Month"
             value="745"
@@ -185,7 +198,7 @@ export function Dashboard() {
             icon={ShoppingCart}
           />
         </div>
-        <div className="cursor-pointer" onClick={() => alert('Analyze order values')}>
+        <div onClick={() => handleCardClick('aov')} className="cursor-pointer">
           <AnalyticsCard
             title="Average Order Value"
             value="$262"
@@ -194,7 +207,7 @@ export function Dashboard() {
             icon={TrendingUp}
           />
         </div>
-        <div className="cursor-pointer" onClick={() => alert('View product performance')}>
+        <div onClick={() => handleCardClick('products')} className="cursor-pointer">
           <AnalyticsCard
             title="Products Sold"
             value="1,850"
@@ -203,7 +216,7 @@ export function Dashboard() {
             icon={Package}
           />
         </div>
-        <div className="cursor-pointer" onClick={() => alert('View conversion analysis')}>
+        <div onClick={() => handleCardClick('conversion')} className="cursor-pointer">
           <AnalyticsCard
             title="Conversion Rate"
             value="3.4%"
@@ -214,21 +227,21 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Interactive Charts */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="relative">
           <SimpleChart
             data={monthlyChartData}
             type="area"
             title="Monthly Sales Trend"
-            height={250}
+            height={expandedChart === 'sales' ? 400 : 250}
           />
           <button
-            className="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm border hover:bg-gray-50 transition-colors"
-            onClick={() => alert('Expand chart view')}
-            title="Expand chart"
+            onClick={() => handleChartExpand('sales')}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 bg-white rounded-lg shadow-sm"
+            title={expandedChart === 'sales' ? 'Förminska' : 'Expandera'}
           >
-            <MoreVertical className="h-4 w-4 text-gray-600" />
+            <ChevronRight className={`h-4 w-4 transition-transform ${expandedChart === 'sales' ? 'rotate-90' : ''}`} />
           </button>
         </div>
         
@@ -237,14 +250,14 @@ export function Dashboard() {
             data={regionChartData}
             type="bar"
             title="Sales by Region"
-            height={250}
+            height={expandedChart === 'regions' ? 400 : 250}
           />
           <button
-            className="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm border hover:bg-gray-50 transition-colors"
-            onClick={() => alert('View regional breakdown')}
-            title="View details"
+            onClick={() => handleChartExpand('regions')}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 bg-white rounded-lg shadow-sm"
+            title={expandedChart === 'regions' ? 'Förminska' : 'Expandera'}
           >
-            <MoreVertical className="h-4 w-4 text-gray-600" />
+            <ChevronRight className={`h-4 w-4 transition-transform ${expandedChart === 'regions' ? 'rotate-90' : ''}`} />
           </button>
         </div>
       </div>
@@ -255,146 +268,95 @@ export function Dashboard() {
             data={customerGrowthData}
             type="line"
             title="Customer Growth"
-            height={250}
+            height={expandedChart === 'customers' ? 400 : 250}
           />
           <button
-            className="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm border hover:bg-gray-50 transition-colors"
-            onClick={() => alert('Analyze customer acquisition')}
-            title="Analyze growth"
+            onClick={() => handleChartExpand('customers')}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 bg-white rounded-lg shadow-sm"
+            title={expandedChart === 'customers' ? 'Förminska' : 'Expandera'}
           >
-            <MoreVertical className="h-4 w-4 text-gray-600" />
+            <ChevronRight className={`h-4 w-4 transition-transform ${expandedChart === 'customers' ? 'rotate-90' : ''}`} />
           </button>
         </div>
         
-        {/* Enhanced Key Insights */}
+        {/* Enhanced Insights */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Key Insights</h3>
-            <button
-              onClick={() => alert('View detailed insights report')}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-            >
-              View All
-            </button>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Insights</h3>
           <div className="space-y-4">
-            <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg cursor-pointer hover:bg-green-100 transition-colors" onClick={() => alert('View Q4 performance details')}>
+            <div 
+              className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              onClick={() => console.log('Navigate to Q4 performance details')}
+            >
               <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">Strong Q4 Performance</p>
                 <p className="text-xs text-gray-600">Revenue increased by 15% compared to last quarter</p>
-                <p className="text-xs text-green-700 mt-1">🎯 Target exceeded by 12%</p>
               </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </div>
-            <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors" onClick={() => alert('View regional analysis')}>
+            
+            <div 
+              className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              onClick={() => console.log('Navigate to regional analysis')}
+            >
               <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">North Region Leading</p>
                 <p className="text-xs text-gray-600">32.5% of total sales coming from northern territories</p>
-                <p className="text-xs text-blue-700 mt-1">📈 +8% vs last period</p>
               </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </div>
-            <div className="flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors" onClick={() => alert('View customer acquisition details')}>
+            
+            <div 
+              className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              onClick={() => console.log('Navigate to customer acquisition details')}
+            >
               <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">Customer Acquisition Up</p>
                 <p className="text-xs text-gray-600">New customers increased by 23% this month</p>
-                <p className="text-xs text-yellow-700 mt-1">🚀 Best performance in 6 months</p>
               </div>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </div>
-            <div className="flex items-start space-x-3 p-3 bg-purple-50 rounded-lg cursor-pointer hover:bg-purple-100 transition-colors" onClick={() => alert('View service category analysis')}>
+            
+            <div 
+              className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              onClick={() => console.log('Navigate to service products analysis')}
+            >
               <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">Service Products Performing</p>
                 <p className="text-xs text-gray-600">Services category showing highest margins at 70%</p>
-                <p className="text-xs text-purple-700 mt-1">💰 +15% margin improvement</p>
               </div>
-            </div>
-          </div>
-          
-          {/* Action Items */}
-          <div className="mt-6 pt-4 border-t border-gray-100">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Recommended Actions</h4>
-            <div className="space-y-2">
-              <button 
-                onClick={() => alert('Opening customer retention analysis...')}
-                className="w-full text-left px-3 py-2 bg-orange-50 text-orange-800 rounded-lg hover:bg-orange-100 transition-colors text-xs"
-              >
-                ⚠️ Focus on customer retention - churn rate increased by 3%
-              </button>
-              <button 
-                onClick={() => alert('Opening inventory optimization...')}
-                className="w-full text-left px-3 py-2 bg-blue-50 text-blue-800 rounded-lg hover:bg-blue-100 transition-colors text-xs"
-              >
-                📦 Optimize inventory for top-performing regions
-              </button>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Actions Panel */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Snabbåtgärder</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button 
-            onClick={() => alert('Opening data import...')}
-            className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-center"
-          >
-            <Upload className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-            <span className="text-sm font-medium text-gray-900">Import Data</span>
+          <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
+            <Upload className="h-6 w-6 text-blue-600 mb-2" />
+            <span className="text-sm font-medium text-gray-900">Importera data</span>
           </button>
           
-          <button 
-            onClick={() => alert('Generating custom report...')}
-            className="p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors text-center"
-          >
-            <FileText className="h-6 w-6 mx-auto mb-2 text-green-600" />
-            <span className="text-sm font-medium text-gray-900">Custom Report</span>
+          <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
+            <Users className="h-6 w-6 text-green-600 mb-2" />
+            <span className="text-sm font-medium text-gray-900">Lägg till kund</span>
           </button>
           
-          <button 
-            onClick={() => alert('Setting up alerts...')}
-            className="p-4 border border-gray-200 rounded-lg hover:border-yellow-300 hover:bg-yellow-50 transition-colors text-center"
-          >
-            <Bell className="h-6 w-6 mx-auto mb-2 text-yellow-600" />
-            <span className="text-sm font-medium text-gray-900">Set Alerts</span>
+          <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors">
+            <Package className="h-6 w-6 text-purple-600 mb-2" />
+            <span className="text-sm font-medium text-gray-900">Hantera produkter</span>
           </button>
           
-          <button 
-            onClick={() => alert('Opening integrations...')}
-            className="p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors text-center"
-          >
-            <Zap className="h-6 w-6 mx-auto mb-2 text-purple-600" />
-            <span className="text-sm font-medium text-gray-900">Integrations</span>
+          <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-yellow-300 hover:bg-yellow-50 transition-colors">
+            <Download className="h-6 w-6 text-yellow-600 mb-2" />
+            <span className="text-sm font-medium text-gray-900">Generera rapport</span>
           </button>
-        </div>
-      </div>
-
-      {/* Performance Alerts */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Performance Alert</h3>
-            <p className="text-sm text-gray-700 mb-4">
-              Your sales velocity is 23% higher than the same period last month. Consider increasing inventory for high-demand products.
-            </p>
-            <div className="flex space-x-3">
-              <button 
-                onClick={() => alert('Viewing detailed alert...')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                View Details
-              </button>
-              <button 
-                onClick={() => alert('Dismissing alert...')}
-                className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-          <TrendingUp className="h-8 w-8 text-blue-600 flex-shrink-0" />
         </div>
       </div>
     </div>
