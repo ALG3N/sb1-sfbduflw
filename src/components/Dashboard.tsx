@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
-import { DollarSign, Users, ShoppingCart, TrendingUp, Package, Target, Download, Calendar, RefreshCw, AlertTriangle, ChevronRight } from 'lucide-react';
+import { DollarSign, Users, ShoppingCart, TrendingUp, Package, Target, Download, Calendar, RefreshCw, AlertTriangle, ChevronRight, Upload } from 'lucide-react';
 import { AnalyticsCard } from './AnalyticsCard';
-import { SimpleChart } from './SimpleChart';
-import { monthlyData, regionData } from '../data/mockData';
+import { InteractiveChart } from './InteractiveChart';
+import { 
+  enhancedMonthlyData, 
+  enhancedRegionData, 
+  enhancedProductData, 
+  enhancedCustomerSegmentData,
+  enhancedChannelData 
+} from '../data/enhancedMockData';
 import { DateRange } from '../types';
 import { format, subDays } from 'date-fns';
 
@@ -13,22 +19,6 @@ export function Dashboard() {
   });
   const [refreshing, setRefreshing] = useState(false);
   const [expandedChart, setExpandedChart] = useState<string | null>(null);
-
-  const monthlyChartData = monthlyData.slice(-6).map(item => ({
-    label: item.month,
-    value: item.sales
-  }));
-
-  const regionChartData = regionData.map(item => ({
-    label: item.region,
-    value: item.sales,
-    color: ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'][regionData.indexOf(item)]
-  }));
-
-  const customerGrowthData = monthlyData.slice(-6).map(item => ({
-    label: item.month,
-    value: item.customers
-  }));
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -228,13 +218,15 @@ export function Dashboard() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="relative">
-          <SimpleChart
-            data={monthlyChartData}
+          <InteractiveChart
+            data={enhancedMonthlyData}
             type="area"
-            title="Monthly Sales Trend"
+            title="Månatlig försäljningstrend"
             height={expandedChart === 'sales' ? 400 : 250}
+            currency={true}
+            animated={true}
           />
           <button
             onClick={() => handleChartExpand('sales')}
@@ -246,11 +238,13 @@ export function Dashboard() {
         </div>
         
         <div className="relative">
-          <SimpleChart
-            data={regionChartData}
+          <InteractiveChart
+            data={enhancedRegionData}
             type="bar"
-            title="Sales by Region"
+            title="Försäljning per region"
             height={expandedChart === 'regions' ? 400 : 250}
+            currency={true}
+            animated={true}
           />
           <button
             onClick={() => handleChartExpand('regions')}
@@ -262,13 +256,32 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="relative">
-          <SimpleChart
-            data={customerGrowthData}
+          <InteractiveChart
+            data={enhancedProductData}
             type="line"
-            title="Customer Growth"
+            title="Produktprestanda"
+            height={expandedChart === 'products' ? 400 : 250}
+            currency={true}
+            animated={true}
+          />
+          <button
+            onClick={() => handleChartExpand('products')}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 bg-white rounded-lg shadow-sm"
+            title={expandedChart === 'products' ? 'Förminska' : 'Expandera'}
+          >
+            <ChevronRight className={`h-4 w-4 transition-transform ${expandedChart === 'products' ? 'rotate-90' : ''}`} />
+          </button>
+        </div>
+        
+        <div className="relative">
+          <InteractiveChart
+            data={enhancedCustomerSegmentData}
+            type="pie"
+            title="Kundsegment"
             height={expandedChart === 'customers' ? 400 : 250}
+            animated={true}
           />
           <button
             onClick={() => handleChartExpand('customers')}
@@ -277,6 +290,49 @@ export function Dashboard() {
           >
             <ChevronRight className={`h-4 w-4 transition-transform ${expandedChart === 'customers' ? 'rotate-90' : ''}`} />
           </button>
+        </div>
+        
+        <div className="relative">
+          <InteractiveChart
+            data={enhancedChannelData}
+            type="bar"
+            title="Försäljningskanaler"
+            height={expandedChart === 'channels' ? 400 : 250}
+            currency={true}
+            animated={true}
+          />
+          <button
+            onClick={() => handleChartExpand('channels')}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 bg-white rounded-lg shadow-sm"
+            title={expandedChart === 'channels' ? 'Förminska' : 'Expandera'}
+          >
+            <ChevronRight className={`h-4 w-4 transition-transform ${expandedChart === 'channels' ? 'rotate-90' : ''}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* Performance Metrics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Realtidsstatistik</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <p className="text-2xl font-bold text-blue-600">127</p>
+              <p className="text-sm text-blue-800">Aktiva sessioner</p>
+            </div>
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <p className="text-2xl font-bold text-green-600">23</p>
+              <p className="text-sm text-green-800">Beställningar idag</p>
+            </div>
+            <div className="text-center p-4 bg-purple-50 rounded-lg">
+              <p className="text-2xl font-bold text-purple-600">1,456 kr</p>
+              <p className="text-sm text-purple-800">Genomsnitt idag</p>
+            </div>
+            <div className="text-center p-4 bg-yellow-50 rounded-lg">
+              <p className="text-2xl font-bold text-yellow-600">3.4%</p>
+              <p className="text-sm text-yellow-800">Konvertering</p>
+            </div>
+          </div>
         </div>
         
         {/* Enhanced Insights */}

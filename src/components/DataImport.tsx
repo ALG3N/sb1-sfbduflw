@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Upload, FileText, Database, CheckCircle, AlertCircle, Download, X, Eye, Trash2, RefreshCw } from 'lucide-react';
+import { Upload, FileText, Download, Eye, Trash2, CheckCircle, AlertCircle, X, FileSpreadsheet, Database } from 'lucide-react';
 import Papa from 'papaparse';
 import { FileUpload } from '../types';
 

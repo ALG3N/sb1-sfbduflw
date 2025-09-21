@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Shield, Mail, Phone, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Filter, Plus, Edit, Trash2, Download, Eye, EyeOff, X, Mail, Phone, Calendar, Shield, CheckCircle, AlertCircle, ChevronDown, RotateCcw, XCircle } from 'lucide-react';
 import { mockUsers } from '../data/mockData';
 import { User } from '../types';
 

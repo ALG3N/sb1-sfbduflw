@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Zap, CheckCircle, XCircle, RefreshCw, Settings, Smartphone, Eye, EyeOff, Copy, Trash2, X } from 'lucide-react';
+import { Plus, Settings, Trash2, Eye, EyeOff, Copy, CheckCircle, AlertCircle, X, ExternalLink, Smartphone, Calendar, Bell, Zap, XCircle, RefreshCw } from 'lucide-react';
 import { mockAPIIntegrations } from '../data/mockData';
 import { APIIntegration } from '../types';
 

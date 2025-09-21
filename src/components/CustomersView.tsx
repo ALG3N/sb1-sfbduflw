@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Mail, Calendar, DollarSign, ShoppingBag, Phone, Plus, Eye, Edit, Trash2, Download, Filter, X } from 'lucide-react';
+import { Search, Filter, Plus, Mail, Phone, Eye, Edit, Trash2, Download, X, User, MapPin, Calendar, ShoppingBag, ChevronDown, DollarSign } from 'lucide-react';
 import { mockCustomers } from '../data/mockData';
 import { Customer, CustomerDetail } from '../types';
 
