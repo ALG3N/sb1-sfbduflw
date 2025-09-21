@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Settings, Trash2, Eye, EyeOff, Copy, CheckCircle, AlertCircle, X, ExternalLink, Smartphone, Calendar, Bell, Zap, XCircle, RefreshCw } from 'lucide-react';
 import { mockAPIIntegrations } from '../data/mockData';
 import { APIIntegration } from '../types';

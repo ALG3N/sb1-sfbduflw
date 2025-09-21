@@ -5,9 +5,11 @@ import { CustomersView } from './components/CustomersView';
 import { DataImport } from './components/DataImport';
 import { UserManagement } from './components/UserManagement';
 import { APIIntegrations } from './components/APIIntegrations';
+import { Menu } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -48,10 +50,22 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="flex-1 overflow-auto">
-        {renderContent()}
+    <div className="min-h-screen bg-gray-50">
+      <Sidebar 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+      />
+      <main className="lg:ml-64">
+        <div className="p-4 lg:hidden">
+          <button onClick={() => setIsSidebarOpen(true)}>
+            <Menu className="h-6 w-6 text-gray-600" />
+          </button>
+        </div>
+        <div className="p-6">
+          {renderContent()}
+        </div>
       </main>
     </div>
   );

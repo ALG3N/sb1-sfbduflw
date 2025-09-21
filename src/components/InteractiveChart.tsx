@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { TrendingUp, TrendingDown, Info } from 'lucide-react';
 
 interface ChartDataPoint {
@@ -273,12 +273,12 @@ export function InteractiveChart({
           {(type === 'line' || type === 'area') && (
             <>
               {type === 'area' && (
-                <defs>
-                  <linearGradient id={`areaGradient-${title}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.5"/>
-                    <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.5"/>
-                  </linearGradient>
-                </defs>
+              <defs>  
+                <linearGradient id={`areaGradient-${title}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.2"/>
+                  <stop offset="100%" stopColor="#3B82F6" stopOpacity="0"/>
+                </linearGradient>
+              </defs> 
               )}
               
               {type === 'area' && (
